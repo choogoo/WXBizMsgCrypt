@@ -1,35 +1,69 @@
-import test from 'ava';
-const should = require('chai').should();
+const rp = require('request-promise')
+const WXBizMsgCrypt = require('wxcrypt');
+var parser = require('xml2json');
 
-const WXCrypt = require('../lib/WXBizMsgCrypt.js');
+const encodingAESKey = ""
+const token = ""
+const nonce = ""
+const appid = ""
+const rawMsg = '<xml><managerid><![CDATA[fbkrb75TNaT]]></managerid><skill><skillname><![CDATA[技能名称1]]></skillname><title><![CDATA[标准问题2]]></title><question><![CDATA[相似问题1]]></question><question><![CDATA[相似问题2]]></question><question><![CDATA[相似问题3]]></question><answer><![CDATA[1]]></answer><answer><![CDATA[2]]></answer></skill><skill><skillname><![CDATA[技能名称1]]></skillname><title><![CDATA[标准问题3]]></title><question><![CDATA[相似问题1]]></question><answer><![CDATA[1]]></answer></skill></xml>';
 
-test('encrypt', t => {
-  t.plan(1);
+/**
+ * @param {string} token 公众号或企业微信Token
+ * @param {string} encodingAESKey 用于消息体的加密
+ * @param {string} appid 公众号的AppID或企业微信的CropID
+ */
+const WXBizMsgCryptnew = new WXBizMsgCrypt(token, encodingAESKey, appid);
 
-  const wxcrypt = new WXCrypt('7ccfb3b5217b4bff', 'wx9ca8afc8075fcc93', 'dd872beTkF0Gc2HfXqUcVb0T78hHvgAYtknqldfBiC9')
-  const rawMsg = '<xml><ToUserName><![CDATA[oditPuFCItL-IPajwFvcgk78OSb4]]></ToUserName><FromUserName><![CDATA[gh_0e7ca0ffb14f]]></FromUserName><CreateTime>1474364883463</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[川川方脑壳熊猫]]></Title><Description><![CDATA[这是一个测试。this is a test.]]></Description><PicUrl><![CDATA[http://image.cdn.fishsaying.com/602854156b424248819b957e93c75835.jpg]]></PicUrl><Url><![CDATA[http://m.fishsaying.com]]></Url></item></Articles></xml>';
+/**
+* 加密函数
+* @param {string} replyMsg 返回的消息体原文
+* @param {string} timestamp 时间戳，调用方生成
+* @param {string} nonce 随机字符串，调用方生成
+* @return {string} 用于返回的密文，以xml组织
+*/
+const timestamp = '1651894591210'
+const estr = WXBizMsgCryptnew.encryptMsg(rawMsg, timestamp, nonce)
 
-  const encryptedMsg = wxcrypt.encrypt(rawMsg);
-  const decryptedMsg = wxcrypt.decrypt(encryptedMsg);
+console.debug(estr)
 
-  t.is(decryptedMsg, rawMsg);
-})
+// xml to json
+var json = parser.toJson(estr);
+console.log("to json -> %s", json);
+json = JSON.parse(json)
+console.debug(json.xml.Encrypt)
 
-// test('encryptMsg', t => {
-//   t.plan(1);
-//   return getIPInfos('asdfasdfadfadf').then(infos => {
-//     t.true(infos.length >= 1);
-//   })
-// })
+const destr = WXBizMsgCryptnew.decryptMsg(json.xml.MsgSignature, timestamp, nonce, estr)
 
-test('decrypt', t => {
-  t.plan(1);
+console.log(destr);
 
-  const wxcrypt = new WXCrypt('7ccfb3b5217b4bff', 'wx9ca8afc8075fcc93', 'dd872beTkF0Gc2HfXqUcVb0T78hHvgAYtknqldfBiC9')
-  const rawMsg = '<xml><ToUserName><![CDATA[oditPuFCItL-IPajwFvcgk78OSb4]]></ToUserName><FromUserName><![CDATA[gh_0e7ca0ffb14f]]></FromUserName><CreateTime>1474364883463</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[川川方脑壳熊猫]]></Title><Description><![CDATA[这是一个测试。this is a test.]]></Description><PicUrl><![CDATA[http://image.cdn.fishsaying.com/602854156b424248819b957e93c75835.jpg]]></PicUrl><Url><![CDATA[http://m.fishsaying.com]]></Url></item></Articles></xml>';
-  const encryptedMsg = 'llHCKWc0PGWZ9mXWHttQbFfmwigCZuGaqNin4qTsPbIPwpuEHbWpBZtpoK3lOoXDoCpz1zbfjDVO7/r+RWc3ihEOTxCF/VgaH2J8cJjvEZQB7Bkf8gvtfLUtSourAgVR9qXPHv3IQjMCxXgmPcMK9AZLBDsHEBgiMf2FAZJh1AMwVaHHQ1XUX3NQWiUHEfv8k2gMGdqztaQld1d+xfLAfF+zj+Hw4zjLfmgMnh5BV1UVWli2v1ECPnJ+J4ZJXTffrGL1OIEIm+iO/xu42z4BNnkOU9gCYxw9ripFPkAGm5SKN1G9Z1DgqDaaNf24M9ImvFYiCQZZB6sVkxglJP+inCDuMzCbx5FwEoPoo8SxGjHnMX5TbWJmQTNxYutdurUTGPNNGp38Ne1YMPBQtgIYj1+qvbhuIbuNHoU43R/uVFQCFv5vqGpy6TqMcbFH74PlGgFstAUVFgo9V4SaZvPx2Y0pcu0V3qY+Je7pKRdT8uGrJdFRyrS0bYx3qtSUrNY1X4R4UMW4inOjbC7PI+BJ/ybofZkHfmXwXHE80m3Nm3vxHZggyqyXUVaw6ga2d+IZeSJ09slSU1R9tMaa4PAFXnPp4bzJNIGPuS+W5Ozurg1r7/HQEoIRdTIvPNg/k+dV43KWTZ1pLLGee18JAlanoFp/Yy85XC4Frnbn+ovXpfI5VV5R/qUAi5cUYF57QMFcmeSDndXledhK/ch6W2g+9uCsxkYTCXom8lORxIwbS8IO4Vo3+oc0YgRnbEqc4OsL';
+async function aibot(encrypt) {
+  let method = 'POST'
+  let uri = `https://openai.weixin.qq.com/openapi/batchimportskill/${token}`
+  let headers = {}
+  let body = {
+    encrypt
+  }
 
-  const decryptedMsg = wxcrypt.decrypt(encryptedMsg);
+  let opt = {
+      method,
+      uri,
+      qs: {},
+      body,
+      headers,
+      json: true
+  }
+  // console.debug(opt)
 
-  t.is(decryptedMsg, rawMsg);
-})
+  try {
+      let res = await rp(opt)
+      console.debug(JSON.stringify(res))
+      return res
+  }
+  catch (err) {
+      console.error(err)
+      return err
+  }
+}
+
+aibot(json.xml.Encrypt)
