@@ -2,7 +2,7 @@
 
 ## 简介
 
-参考微信开放平台提供的示例代码增加python3、nodejs的实现，适配微信对话开放平台API
+参考微信开放平台提供的示例代码增加python3、nodejs的实现，适配[微信对话开放平台API](https://developers.weixin.qq.com/doc/aispeech/confapi/bot/batchimportskill.html)
 
 ## 微信官方加解密SDK
 
