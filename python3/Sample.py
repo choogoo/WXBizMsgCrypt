@@ -16,11 +16,11 @@ if __name__ == "__main__":
    1.第三方回复加密消息给公众平台；
    2.第三方收到公众平台发送的消息，验证消息的安全性，并对消息进行解密。
    """
-   encodingAESKey = "2AtfpT4BS**********hd" 
-   token = "uePZdAFJv********IS"
+   encodingAESKey = "" 
+   token = ""
    nonce = "1320562132"
-   appid = "tR36***Ms4TyG6Y"
-   USERID = 'fbkrb75TNaT'
+   appid = ""
+   USERID = ''
 
    to_xml = """<xml><managerid><![CDATA[fbkrb75TNaT]]></managerid></xml>"""
 

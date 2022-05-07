@@ -11,6 +11,7 @@
   "dependencies": {
     "request-promise": "^4.2.6",
     "wxcrypt": "^1.4.3",
+    "xml2js": "^0.4.23",
     "xml2json": "^0.12.0"
   }
 }
